@@ -8,9 +8,12 @@ import (
 	"flag"
 	"log"
 	"net/http"
+
+	"github.com/gorilla/mux"
 )
 
 var addr = flag.String("addr", ":8080", "http service address")
+var house = make(map[string]*Hub)
 
 func serveHome(w http.ResponseWriter, r *http.Request) {
 	log.Println(r.URL)
@@ -27,10 +30,20 @@ func serveHome(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	flag.Parse()
-	hub := newHub()
-	go hub.run()
-	http.HandleFunc("/", serveHome)
-	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
+	r := mux.NewRouter()
+	r.HandleFunc("/", serveHome)
+	r.HandleFunc("/ws/{room}", func(w http.ResponseWriter, r *http.Request) {
+		vars := mux.Vars(r)
+		roomId := vars["room"]
+		room, ok := house[roomId]
+		var hub *Hub
+		if ok {
+			hub = room
+		} else {
+			hub = newHub()
+			house[roomId] = hub
+			go hub.run()
+		}
 		serveWs(hub, w, r)
 	})
 	err := http.ListenAndServe(*addr, nil)
