@@ -36,7 +36,7 @@ func main() {
 		if ok {
 			hub = room
 		} else {
-			hub = newHub()
+			hub = newHub(roomId)
 			house[roomId] = hub
 			go hub.run()
 		}
