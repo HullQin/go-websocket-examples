@@ -1,0 +1,14 @@
+.idea/
+
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Dependency directories
+vendor/
+
+# Go workspace file
+go.work
