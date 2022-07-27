@@ -4,6 +4,8 @@
 
 package main
 
+import "fmt"
+
 // Hub maintains the set of active clients and broadcasts messages to the
 // clients.
 type Hub struct {
@@ -48,6 +50,7 @@ func (h *Hub) run() {
 				delete(h.clients, client)
 				close(client.send)
 				if len(h.clients) == 0 {
+					fmt.Println("Delete room", h.roomId)
 					delete(house, h.roomId)
 					return
 				}

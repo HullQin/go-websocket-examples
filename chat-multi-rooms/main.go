@@ -6,8 +6,10 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/gorilla/mux"
 )
@@ -32,10 +34,14 @@ func main() {
 		vars := mux.Vars(r)
 		roomId := vars["room"]
 		room, ok := house[roomId]
+		fmt.Println("Sleep 5 seconds")
+		time.Sleep(time.Second * 5)
 		var hub *Hub
 		if ok {
+			fmt.Println("Found room")
 			hub = room
 		} else {
+			fmt.Println("Create room")
 			hub = newHub(roomId)
 			house[roomId] = hub
 			go hub.run()
