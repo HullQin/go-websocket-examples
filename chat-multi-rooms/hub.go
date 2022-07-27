@@ -18,9 +18,6 @@ type Hub struct {
 	// Inbound messages from the clients.
 	broadcast chan []byte
 
-	// Register requests from the clients.
-	register chan *Client
-
 	// Unregister requests from clients.
 	unregister chan *Client
 }
@@ -29,7 +26,6 @@ func newHub(roomId string) *Hub {
 	return &Hub{
 		roomId:     roomId,
 		broadcast:  make(chan []byte),
-		register:   make(chan *Client),
 		unregister: make(chan *Client),
 		clients:    make(map[*Client]bool),
 	}
@@ -37,15 +33,11 @@ func newHub(roomId string) *Hub {
 
 func (h *Hub) run() {
 	defer func() {
-		close(h.register)
 		close(h.unregister)
 		close(h.broadcast)
 	}()
 	for {
 		select {
-		case client := <-h.register:
-			h.clients[client] = true
-			mutex.Unlock()
 		case client := <-h.unregister:
 			mutex.Lock()
 			if _, ok := h.clients[client]; ok {
