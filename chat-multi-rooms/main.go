@@ -9,11 +9,13 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"sync"
 	"time"
 
 	"github.com/gorilla/mux"
 )
 
+var mutex sync.Mutex
 var addr = flag.String("addr", ":8080", "http service address")
 var house = make(map[string]*Hub)
 
@@ -33,6 +35,7 @@ func main() {
 	r.HandleFunc("/ws/{room}", func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
 		roomId := vars["room"]
+		mutex.Lock()
 		room, ok := house[roomId]
 		fmt.Println("Sleep 5 seconds")
 		time.Sleep(time.Second * 5)

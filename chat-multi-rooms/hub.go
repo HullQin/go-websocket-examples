@@ -45,16 +45,20 @@ func (h *Hub) run() {
 		select {
 		case client := <-h.register:
 			h.clients[client] = true
+			mutex.Unlock()
 		case client := <-h.unregister:
+			mutex.Lock()
 			if _, ok := h.clients[client]; ok {
 				delete(h.clients, client)
 				close(client.send)
 				if len(h.clients) == 0 {
 					fmt.Println("Delete room", h.roomId)
 					delete(house, h.roomId)
+					mutex.Unlock()
 					return
 				}
 			}
+			mutex.Unlock()
 		case message := <-h.broadcast:
 			for client := range h.clients {
 				select {
