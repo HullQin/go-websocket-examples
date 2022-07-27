@@ -6,13 +6,10 @@ package main
 
 import (
 	"flag"
-	"fmt"
+	"github.com/gorilla/mux"
 	"log"
 	"net/http"
 	"sync"
-	"time"
-
-	"github.com/gorilla/mux"
 )
 
 var mutex sync.Mutex
@@ -37,14 +34,10 @@ func main() {
 		roomId := vars["room"]
 		mutex.Lock()
 		room, ok := house[roomId]
-		fmt.Println("Sleep 5 seconds")
-		time.Sleep(time.Second * 5)
 		var hub *Hub
 		if ok {
-			fmt.Println("Found room")
 			hub = room
 		} else {
-			fmt.Println("Create room")
 			hub = newHub(roomId)
 			house[roomId] = hub
 			go hub.run()
