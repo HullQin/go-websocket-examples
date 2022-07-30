@@ -12,9 +12,10 @@ import (
 	"sync"
 )
 
-var mutex sync.Mutex
 var addr = flag.String("addr", ":8080", "http service address")
 var house = make(map[string]*Hub)
+var roomMutexes = make(map[string]*sync.Mutex)
+var mutexForRoomMutexes = new(sync.Mutex)
 
 func serveHome(w http.ResponseWriter, r *http.Request) {
 	log.Println(r.URL)
@@ -32,7 +33,15 @@ func main() {
 	r.HandleFunc("/ws/{room}", func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
 		roomId := vars["room"]
-		mutex.Lock()
+		mutexForRoomMutexes.Lock()
+		roomMutex, ok := roomMutexes[roomId]
+		if ok {
+			roomMutex.Lock()
+		} else {
+			roomMutexes[roomId] = new(sync.Mutex)
+			roomMutexes[roomId].Lock()
+		}
+		mutexForRoomMutexes.Unlock()
 		room, ok := house[roomId]
 		var hub *Hub
 		if ok {
