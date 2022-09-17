@@ -34,6 +34,11 @@ func newHub(roomId string) *Hub {
 }
 
 func (h *Hub) run() {
+	defer func() {
+		close(h.register)
+		close(h.unregister)
+		close(h.broadcast)
+	}()
 	for {
 		select {
 		case client := <-h.register:
@@ -44,7 +49,7 @@ func (h *Hub) run() {
 				close(client.send)
 				if len(h.clients) == 0 {
 					delete(house, h.roomId)
-					break
+					return
 				}
 			}
 		case message := <-h.broadcast:
