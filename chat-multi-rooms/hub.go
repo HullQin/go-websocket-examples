@@ -42,7 +42,7 @@ func (h *Hub) run() {
 				delete(h.clients, client)
 				close(client.send)
 				if len(h.clients) == 0 {
-					delete(house, h.roomId)
+					house.Delete(h.roomId)
 					roomMutexes[h.roomId].Unlock()
 					return
 				}

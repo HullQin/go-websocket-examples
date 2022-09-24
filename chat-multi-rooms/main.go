@@ -13,7 +13,7 @@ import (
 )
 
 var addr = flag.String("addr", ":8080", "http service address")
-var house = make(map[string]*Hub)
+var house sync.Map
 var roomMutexes = make(map[string]*sync.Mutex)
 var mutexForRoomMutexes = new(sync.Mutex)
 
@@ -42,13 +42,13 @@ func main() {
 			roomMutexes[roomId].Lock()
 		}
 		mutexForRoomMutexes.Unlock()
-		room, ok := house[roomId]
+		room, ok := house.Load(roomId)
 		var hub *Hub
 		if ok {
-			hub = room
+			hub = room.(*Hub)
 		} else {
 			hub = newHub(roomId)
-			house[roomId] = hub
+			house.Store(roomId, hub)
 			go hub.run()
 		}
 		serveWs(hub, w, r)
